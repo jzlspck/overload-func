@@ -33,8 +33,6 @@ type PickMatchingFunctions<TN extends TypeName[], TF extends FunctionType[]> =
 			: never
 		: never;
 
-type A = TypeNameToType<['string', 'object']>;
-
 type AddImpleParams<TN extends TypeName[], T extends FunctionType[]> = [...args: TN, callback: PickMatchingFunctions<TN, T>];
 
 interface IAddImple<T extends FunctionType[]> {
@@ -42,13 +40,31 @@ interface IAddImple<T extends FunctionType[]> {
 }
 
 export function createOverloadedFunction<T extends FunctionType[] = []>() {
+	const ImpleMap: Map<string, T[number]> = new Map();
 
-  const result = function(...args: any[]) {
-    
+  const result = function(...args: any[]) {    
+		const argsKey = args.map(arg => {
+			const type = typeof arg;
+			if (type === 'object' && arg === null) {
+				return 'null';
+			}
+			return type;
+		}).join('-');
+		const imple = ImpleMap.get(argsKey);
+		if (!imple) {
+			throw new Error(`No implementation found for argument types: (${argsKey.split('-').join(', ')})`);
+		}
+		return imple(...args);
   } as FuncTupleToIntersection<T> & IAddImple<T>;
 
 	result.addImple = function(...args) {
-
+		const callback = args.pop() as T[number];
+		const typeNames = args as TypeName[];
+		const key = typeNames.join('-');
+		if (ImpleMap.has(key)) {
+			throw new Error(`Implementation for types (${typeNames.join(', ')}) already exists.`);
+		}
+		ImpleMap.set(key, callback);
 	}
 
   return result;
@@ -78,3 +94,5 @@ func.addImple('object', (x) => {
 const r1 = func(10);
 const r2 = func('hello', 'world');
 const r3 = func({ name: 'Alice', age: 20 });
+
+console.log(r1, r2, r3); // 20 'helloworld' true
