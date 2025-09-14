@@ -59,6 +59,9 @@ export function createOverloadedFunction<T extends FunctionType[] = []>() {
 
 	result.addImple = function(...args) {
 		const callback = args.pop() as T[number];
+		if (typeof callback !== 'function') {
+			throw new Error('The last argument must be a function.');
+		}
 		const typeNames = args as TypeName[];
 		const key = typeNames.join('-');
 		if (ImpleMap.has(key)) {
