@@ -1,3 +1,4 @@
+import { complexTypes } from "./utils";
 
 export type FunctionType = (...args: any[]) => any;
 
@@ -11,8 +12,12 @@ export type TupleToIntersection<T extends readonly any[]> = T extends [infer F, 
 
 export type FuncTupleToIntersection<T extends FunctionType[]> = T extends [infer F, ...infer R] ? F extends FunctionType ? R extends FunctionType[] ? FuncTupleToIntersection<R> & F : F : never : unknown;
 
-
-type TypeMap = {
+// 获取类实例类型映射
+type InstanceTypes<T extends Record<string, new (...args: any) => any>> = {
+  [K in keyof T]: InstanceType<T[K]>;
+}
+// 基本数据类型，以及一些其他内置复杂类型映射
+type TypeMap = InstanceTypes<typeof complexTypes> & {
 	string: string;
 	number: number;
 	boolean: boolean;
@@ -21,6 +26,7 @@ type TypeMap = {
 	symbol: symbol;
 	bigint: bigint;
 	function: Function;
+  array: any[];
 	object: object;
 }
 
