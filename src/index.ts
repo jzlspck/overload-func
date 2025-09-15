@@ -1,8 +1,7 @@
 import type {
- 	FunctionType,
- 	FuncTupleToIntersection,
+ 	FT,
 	TypeName,
-	IAddImple,
+	IOverloadFunction
 } from "./interface";
 import { getTypeNames } from "./utils";
 
@@ -13,8 +12,8 @@ interface IParams {
 	extendType?: Record<string, new (...args: any[]) => any>;
 }
 
-export function createOverloadedFunction<T extends FunctionType[] = []>(options: IParams = {}) {
-	const { allowMultiple = false } = options;
+export function createOverloadedFunction<T extends FT[] = []>(options: IParams = {}) {
+	const { allowMultiple = false, extendType = {} } = options;
 
 	const ImpleMap: Map<string, T[number]> = new Map();
 
@@ -25,7 +24,7 @@ export function createOverloadedFunction<T extends FunctionType[] = []>(options:
 			throw new Error(`No implementation found for argument types: (${argsKey.split('-').join(', ')})`);
 		}
 		return imple.apply(this, args);
-	} as FuncTupleToIntersection<T> & IAddImple<T>;
+	} as IOverloadFunction<T>;
 
 	result.addImple = function(...args) {
 		const callback = args.pop() as T[number];
