@@ -1,30 +1,38 @@
 import type {
  	FT,
 	TypeName,
-	IOverloadFunction
+	IOverloadFunction,
+	InstanceTypes
 } from "./interface";
-import { getTypeNames } from "./utils";
+import { getTypeNames, createExtendType } from "./utils";
+import type { ConstructableRecord } from "./utils";
+import { extendTypeSymbol } from "./utils";
 
-interface IParams {
+interface IParams<T> {
 	// 允许多个实现
 	allowMultiple?: boolean;
 	// 允许拓展类型
-	extendType?: Record<string, new (...args: any[]) => any>;
+	extendType?: T;
 }
 
-export function createOverloadedFunction<T extends FT[] = []>(options: IParams = {}) {
-	const { allowMultiple = false, extendType = {} } = options;
+export function createOverloadedFunction<T extends FT[], E extends ReturnType<typeof createExtendType>>(options: IParams<E> = {}) {
+	const { allowMultiple = false, extendType } = options;
+
+	// 拓展类型，但是没有使用 createExtendType 创建
+	if (extendType && !extendType[extendTypeSymbol]) {
+		console.warn('Warning: The extendType should be created using createExtendType for proper functionality.');
+	}
 
 	const ImpleMap: Map<string, T[number]> = new Map();
 
 	const result = function(...args: any[]) {  
-		const argsKey = getTypeNames(args).join('-');
+		const argsKey = getTypeNames(args, extendType).join('-');
 		const imple = ImpleMap.get(argsKey);
 		if (!imple) {
 			throw new Error(`No implementation found for argument types: (${argsKey.split('-').join(', ')})`);
 		}
 		return imple.apply(this, args);
-	} as IOverloadFunction<T>;
+	} as IOverloadFunction<T, InstanceTypes<E>>;
 
 	result.addImple = function(...args) {
 		const callback = args.pop() as T[number];
@@ -55,17 +63,28 @@ export function createOverloadedFunction<T extends FT[] = []>(options: IParams =
   return result;
 }
 
+class User {
+	constructor(public name: string, public age: number, public gender: string) {}
+}
+
+const extendType = createExtendType({
+	user: User,
+});
+
 const func = createOverloadedFunction<[
 	(x: number) => number,
 	(x: string, y: string) => string,
 	(x: {
 		name: string;
 		age: number;
+		address: string;
 	}) => boolean,
 	(x: number, y: (n: number) => number) => number,
-	(d: Date) => string
-]>({
-	// allowMultiple: true
+	(d: Promise<number>) => string,
+	(u: User) => string
+], typeof extendType>({
+	// allowMultiple: true,
+	extendType
 });	
 
 func.addImple('number', (x) => {
@@ -93,14 +112,19 @@ func.addImple('number', 'function', (x, y) => {
 	return y(x) + 2;
 });
 
-func.addImple('date', (d) => {
-	return d.toISOString();
+func.addImple('promise', (d) => {
+	return 'Handled a promise';
+});
+
+func.addImple('user', (u) => {
+	return `User: ${u.name}, Age: ${u.age}`;
 });
 
 const r1 = func(10);
 const r2 = func('hello', 'world');
-const r3 = func({ name: 'Alice', age: 20 });
+const r3 = func({ name: 'Alice', age: 20, address: '123 Main St' });
 const r4 = func(10, (x) => x * 2);
+const r6 = func(new User('pink', 23, 'male'))
 
 
-console.log(r1, r2, r3, r4); // 20 'helloworld' true
+console.log(r1, r2, r3, r4, r6); // 20 'helloworld' true

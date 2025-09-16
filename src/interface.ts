@@ -17,7 +17,7 @@ export type InstanceTypes<T extends Record<string, new (...args: any) => any>> =
   [K in keyof T]: InstanceType<T[K]>;
 }
 // 基本数据类型，以及一些其他内置复杂类型映射
-type TypeMap = InstanceTypes<typeof complexTypes> & {
+type TypeMap<ET extends Record<string, any>> = ET & InstanceTypes<typeof complexTypes> & {
 	string: string;
 	number: number;
 	boolean: boolean;
@@ -28,28 +28,28 @@ type TypeMap = InstanceTypes<typeof complexTypes> & {
 	function: Function;
 	array: any[];
 	object: object;
-}
+};
 
-export type TypeName = keyof TypeMap;
+export type TypeName<ET extends Record<string, any> = {}> = keyof TypeMap<ET>;
 
 // 将类型名称数组转换为对应的类型数组
-type TypeNameToType<T extends TypeName[]> = {
-	[K in keyof T]: T[K] extends TypeName ? TypeMap[T[K]] : never;
+type TypeNameToType<ET extends Record<string, any>, T extends TypeName<ET>[]> = {
+	[K in keyof T]: T[K] extends TypeName<ET> ? TypeMap<ET>[T[K]] : never;
 }
 // 从函数类型数组中挑选出参数类型与给定类型名称数组匹配的函数类型
-type PickMatchingFunctions<TN extends TypeName[], TF extends FT[]> =
+type PickMatchingFunctions<ET extends Record<string, any>, TN extends TypeName<ET>[], TF extends FT[]> =
 	TF extends [infer F, ...infer R]
   	? F extends FT
-		  ? LooseEqual<Parameters<F>, TypeNameToType<TN>> extends true
+		  ? LooseEqual<Parameters<F>, TypeNameToType<ET, TN>> extends true
 			  ? F
-				: PickMatchingFunctions<TN, R extends FT[] ? R : []>
+				: PickMatchingFunctions<ET, TN, R extends FT[] ? R : []>
 			: never
 		: never;
 
-type AddImpleParams<TN extends TypeName[], T extends FT[]> = [...args: TN, callback: PickMatchingFunctions<TN, T>];
+type AddImpleParams<ET extends Record<string, any>, TN extends TypeName<ET>[], T extends FT[]> = [...args: TN, callback: PickMatchingFunctions<ET, TN, T>];
 
-export interface IAddImple<T extends FT[]> {
-	addImple<TN extends TypeName[]>(...args: AddImpleParams<TN, T>): IOverloadFunction<T>;
+export interface IAddImple<T extends FT[], ET extends Record<string, any>> {
+	addImple<TN extends TypeName<ET>[]>(...args: AddImpleParams<ET, TN, T>): IOverloadFunction<T, ET>;
 }
 
-export type IOverloadFunction<T extends FT[]> = FuncTupleToIntersection<T> & IAddImple<T>;
+export type IOverloadFunction<T extends FT[], ET extends Record<string, any>> = FuncTupleToIntersection<T> & IAddImple<T, ET>;
