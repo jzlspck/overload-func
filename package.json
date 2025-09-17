@@ -1,24 +1,17 @@
 {
-  "name": "fan-flip-js",
+  "name": "overload-func",
   "private": false,
   "version": "1.0.0",
   "author": "fan-two",
-  "description": "基于 FLIP 动画思想，处理元素结构变化的动画，并且同时处理元素样式变化引起的动画",
+  "description": "",
   "keywords": [
-    "flip",
-    "animation",
-    "css",
-    "javascript"
+    "typescript",
+    "overload",
+    "function"
   ],
   "type": "module",
   "main": "lib/flip.umd.js",
   "module": "lib/flip.es.js",
-  "exports": {
-    ".": {
-      "import": "./lib/flip.es.js",
-      "require": "./lib/flip.umd.js"
-    }
-  },
   "types": "lib/types/index.d.ts",
   "files": [
     "lib/*"
