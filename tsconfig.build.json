@@ -1,6 +1,6 @@
 {
   "files": [
-    "src/index.ts"
+    "src/entry.ts"
   ],
   "compilerOptions": {
     "declaration": true,

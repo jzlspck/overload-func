@@ -10,8 +10,8 @@
     "function"
   ],
   "type": "module",
-  "main": "lib/flip.umd.js",
-  "module": "lib/flip.es.js",
+  "main": "lib/overload.umd.js",
+  "module": "lib/overload.es.js",
   "types": "lib/types/index.d.ts",
   "files": [
     "lib/*"
