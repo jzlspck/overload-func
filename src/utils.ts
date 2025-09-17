@@ -1,4 +1,4 @@
-import type { TypeName } from "./interface";
+import type { InstanceTypes, TypeName } from "./interface";
 
 export const complexTypes = {
   date: Date,
@@ -11,7 +11,7 @@ export const complexTypes = {
   error: Error
 } as const;
 
-export function getTypeName(arg: any, extendType?: ConstructableRecord): TypeName {
+export function getTypeName<T extends ConstructableRecord>(arg: any, extendType?: T): TypeName<InstanceTypes<T>> {
   // 数组
   if (Array.isArray(arg)) {
     return 'array';
@@ -32,7 +32,8 @@ export function getTypeName(arg: any, extendType?: ConstructableRecord): TypeNam
 	return type;
 }
 
-export function getTypeNames(args: any[], extendType?: ConstructableRecord): TypeName[] {
+export function getTypeNames<T extends ConstructableRecord>(args: any[], extendType?: T): TypeName<InstanceTypes<T>>[] {
+
 	return args.map(arg => getTypeName(arg, extendType));
 }
 
