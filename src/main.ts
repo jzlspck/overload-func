@@ -20,7 +20,8 @@ const func = createOverloadedFunction<[
 	}) => boolean,
 	(x: number, y: (n: number) => number) => number,
 	(d: Promise<number>) => string,
-	(u: User) => string
+	(u: User) => string,
+	(this: User, n: number, s: string) => boolean
 ], typeof extendType>({
 	// allowMultiple: true,
 	extendType
@@ -59,6 +60,11 @@ func.addImple('user', (u) => {
 	return `User: ${u.name}, Age: ${u.age}`;
 });
 
+func.addImple('number', 'string', function(a) {
+	this.name
+	return true;
+});
+
 const r1 = func(10);
 const r2 = func('hello', 'world');
 const r3 = func({ name: 'Alice', age: 20, address: '123 Main St' });
@@ -67,3 +73,29 @@ const r6 = func(new User('pink', 23, 'male'))
 
 
 console.log(r1, r2, r3, r4, r6); // 20 'helloworld' true
+
+type A = (this: User, a: number) => number;
+
+type B = Parameters<A>;
+type C = ThisType<A>;
+
+let c: C = 8;
+
+const test = createOverloadedFunction<[
+	(this: Test, n: number) => boolean,
+	(this: Test, n: string, s: string) => string,
+]>();
+
+test.addImple('number', function(n) {
+	return true;
+});
+test.addImple('string', 'string', function(n) {
+	return n;
+});
+class Test {
+	test = test
+}
+const t = new Test();
+
+t.test(8)
+t.test('pknk', 'lll')

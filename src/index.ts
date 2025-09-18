@@ -14,7 +14,7 @@ interface IParams<T> {
 	extendType?: T;
 }
 
-export function createOverloadedFunction<T extends FT[], E extends ReturnType<typeof createExtendType>>(options: IParams<E> = {}) {
+export function createOverloadedFunction<T extends FT[], E extends ReturnType<typeof createExtendType> = { [extendTypeSymbol]: true }>(options: IParams<E> = {}) {
 	const { allowMultiple = false, extendType } = options;
 
 	// 拓展类型，但是没有使用 createExtendType 创建
