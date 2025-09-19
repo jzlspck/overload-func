@@ -11,6 +11,7 @@ const extendType = createExtendType({
 });
 
 const func = createOverloadedFunction<[
+	() => void,
 	(x: number) => number,
 	(x: string, y: string) => string,
 	(x: {
@@ -26,6 +27,11 @@ const func = createOverloadedFunction<[
 	// allowMultiple: true,
 	extendType
 });	
+
+func.addImple(() => {
+	console.log('First implementation for void');
+});
+func();
 
 func.addImple('number', (x) => {
 	console.log('First implementation for number');
@@ -99,3 +105,40 @@ const t = new Test();
 
 t.test(8)
 t.test('pknk', 'lll')
+
+class Teacher {
+	salary: number;
+	constructor(public name: string) {}
+}
+class Student {
+	score: number;
+	constructor(public name: string) {}
+}
+const extendType2 = createExtendType({
+	teacher: Teacher,
+	student: Student,
+});
+const test2 = createOverloadedFunction<[
+	(t: Teacher) => string,
+	(s: Student) => number,
+], typeof extendType2>({
+	extendType: extendType2,
+});
+test2.addImple('teacher', (t) => t.name);
+test2.addImple('student', (s) => s.name.length);
+const res1 = test2(new Teacher('John'));
+const res2 = test2(new Student('Alice'));
+console.log(res1, res2); // John 5
+
+const test3 = createOverloadedFunction<[
+	(a: number, b: string) => boolean,
+	(a: string, b?: number) => string,
+]>();
+
+test3.addImple('number','string', (a, b) => true);
+test3.addImple('string', 'number', (a, b) => b.toFixed());
+
+const res3 = test3(10, 'hello');
+const res4 = test3('hello');
+console.log(res3, res4); // true hello
+

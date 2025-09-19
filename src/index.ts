@@ -24,7 +24,7 @@ export function createOverloadedFunction<T extends FT[], E extends ReturnType<ty
 
 	const ImpleMap: Map<string, T[number]> = new Map();
 
-	const result = function(...args: any[]) {  
+	const result = function(this: any, ...args: any[]) {  
 		const argsKey = getTypeNames(args, extendType).join('-');
 		const imple = ImpleMap.get(argsKey);
 		if (!imple) {
@@ -45,7 +45,7 @@ export function createOverloadedFunction<T extends FT[], E extends ReturnType<ty
 			if (allowMultiple) {
 		    // 允许多个实现
 				const existingCallback = ImpleMap.get(key) as FT;
-				const newCallback = function(...cbArgs: any[]) {
+				const newCallback = function(this: any, ...cbArgs: any[]) {
 					existingCallback.apply(this, cbArgs);
 					return callback.apply(this, cbArgs);
 				};

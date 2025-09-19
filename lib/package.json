@@ -1,5 +1,6 @@
 {
   "main": "./overload.umd.js",
   "module": "./overload.es.js",
-  "types": "./types/entry.d.ts"
+  "types": "./types/entry.d.ts",
+  "type": "module"
 }
