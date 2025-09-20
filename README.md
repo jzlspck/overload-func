@@ -2,7 +2,7 @@
 
 ## 介绍
 
-overload-func 是一款轻量级的函数重载库，提供一种简单优雅的方式来实现函数重载。
+overload-func 是一个**极少量运行时代码**的函数重载库，提供一种简单优雅的方式来实现函数重载。
 
 <font size="6">优雅永不过时！！！</font>
 
@@ -96,6 +96,20 @@ const r2 = func(1, 2); // boolean
 
 ### 可选参数
 
+目前**不支持**在函数签名中使用**可选参数**。
+
+例如：`(a: number, b?: string) => boolean`，如果使用这样的可选参数，使用中是可能会出错的。因为类似于 `func(1)` 这样的调用，没法正确匹配到函数实现。暂时还没有想到好的解决方案。
+
+我们可以通过下面的方式处理需要可选参数的场景。
+
+```typescript
+const fn = createOverloadedFunction<[
+	(a: number) => boolean,
+	(a: number, b: string) => boolean,
+]>();
+```
+
+不过换句话说，可选参数的场景，在函数实现中就存在判断参数类型的逻辑。这好像和我们使用这个库编写重载代码的初衷相悖吧😂。当然大家有什么好的想法，欢迎交流指教。
 
 ### 结构化类型
 
@@ -134,7 +148,7 @@ export type LooseEqual<X, Y> = X extends Y ? true : Y extends X ? true : false;
 
 ### 为一个重载添加多个实现
 
-默认情况下，一个重载只允许添加一个实现。如果需要允许多个实现，可以设置 `allowMultiple` 配置选项，设置为 `true` 时，可以为一个重载添加多个实现。
+**默认情况下，一个重载只允许添加一个实现**。如果需要允许多个实现，可以设置 `allowMultiple` 配置选项，设置为 `true` 时，可以为一个重载添加多个实现。
 
 ```typescript
 const func = createOverloadedFunction<[
@@ -154,7 +168,7 @@ func.addImple('string', (a) => {
 const r1 = func('hello'); // HELLO
 ```
 
-此时，调用函数并传入一个 `string` 类型参数，会依次调用两个实现函数。但是要注意，**返回值为最后一个实现函数的返回值**。
+此时，调用函数并传入一个 `string` 类型参数，会**依次调用两个实现函数**。但是要注意，**返回值为最后一个实现函数的返回值**。
 
 ### 拓展类型
 
@@ -191,6 +205,8 @@ const res2 = test2(new Student('Alice'));
 console.log(res1, res2); // John 5
 ```
 
-正如之前 [*结构化类型*](#结构化类型) 中提到的，TS 是结构化类型系统。所以上面的例子中，为了区分 `Teacher` 和 `Student`，它们必须拥有不同的属性。
+正如之前 [*结构化类型*](#结构化类型) 中提到的问题，TS 是结构化类型系统。所以上面的例子中，为了区分 `Teacher` 和 `Student`，它们必须拥有不同的属性。
 
+当通过 `extendType` 拓展类型时，`addImple` 方法的可选类型参数就会增加 `teacher` 和 `student`，同时也会有相应的代码提示。
 
+![代码提示](./static/04.png)
