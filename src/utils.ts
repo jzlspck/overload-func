@@ -19,7 +19,7 @@ export function getTypeName<T extends ConstructableRecord>(arg: any, extendType?
   // 一些内置复杂类型
   const mergedTypes = { ...extendType, ...complexTypes };
   for (const k in mergedTypes) {
-    if (arg instanceof mergedTypes[k]) {
+    if (arg instanceof mergedTypes[k as keyof typeof mergedTypes]) {
       return k as keyof typeof mergedTypes;
     }
   }
