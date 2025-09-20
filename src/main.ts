@@ -143,13 +143,14 @@ const res4 = test3('hello');
 console.log(res3, res4); // true hello
 
 class Person {
+	address: string;
 	constructor(public name: string, public age: number) {}
 }
 const extendType3 = createExtendType({
 	person: Person,
 });
 const fn = createOverloadedFunction<[
-	(a: { name: string, age: number }) => number,
+	(a: { name: string, age: number, gender: string }) => number,
 	(a: Person) => boolean
 ], typeof extendType3>({
 	extendType: extendType3,

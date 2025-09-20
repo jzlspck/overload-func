@@ -117,8 +117,16 @@ const fn = createOverloadedFunction<[
 	extendType: extendType
 });
 fn.addImple('object', (a) => a.age);
-fn.addImple('person', (a) => a.age > 18);
+fn.addImple('person', (a) => a.age > 18); // error
 ```
+
+在上面的例子中，两个实现匹配到的都是第一个函数签名。因为 TS 是结构化类型，`Person` 类型和 `{ name: string, age: number }` 是兼容的。源码中我使用了一个 `LooseEqual` 工具类来判断两个类型是否相等
+
+```typescript
+export type LooseEqual<X, Y> = X extends Y ? true : Y extends X ? true : false;
+```
+
+如果确实需要上面的功能，就需要两个对象拥有明确区别的属性。我们可以为 `Person` 添加一个 `gender` 属性，为 `{ name: string, age: number }` 添加一个 `id` 属性。这样一来，就能正确匹配到各自的函数签名。
 
 ## 高阶指引
 
@@ -152,6 +160,11 @@ const r1 = func('hello'); // HELLO
 
 `extendType` 参数允许扩展类型支持，可以为 `addImple` 方法拓展可选类型参数。
 
+通过创建类来定义类型，传入对象，键名将作为 `addImple` 方法的可选类型参数，类作为键值。这里希望推荐 `createExtendType` 方法创建拓展类型（可以得到更好的类型检查）。
+
+1. 函数的返回值传入 `extendType` 参数
+2. 函数返回值的函数
+
 ```typescript
 class Teacher {
   salary: number;
@@ -177,3 +190,7 @@ const res1 = test2(new Teacher('John'));
 const res2 = test2(new Student('Alice'));
 console.log(res1, res2); // John 5
 ```
+
+正如之前 [*结构化类型*](#结构化类型) 中提到的，TS 是结构化类型系统。所以上面的例子中，为了区分 `Teacher` 和 `Student`，它们必须拥有不同的属性。
+
+
