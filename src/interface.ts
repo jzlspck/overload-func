@@ -5,8 +5,20 @@ export type FT = (...args: any[]) => any;
 export type Equal<X, Y> =
   (<T>() => T extends X ? 1 : 2) extends
   (<T>() => T extends Y ? 1 : 2) ? true : false
-// 宽松相等，继承也可以
-export type LooseEqual<X, Y> = X extends Y ? true : Y extends X ? true : false;
+// 宽松相等，继承也可以，但是其他复杂类型不能和 object 匹配
+export type LooseEqual<X, Y> = Equal<Y, object> extends true
+  ? 0
+  : X extends Y ? true : false;
+
+// 匹配两个元组类型，X 为函数签名参数类型，Y 为字符串映射的参数类型
+export type TupleEqual<X extends any[], Y extends any[]> =
+  X extends [infer FX, ...infer RX]
+    ? Y extends [infer FY, ...infer RY]
+      ? LooseEqual<FX, FY> extends true
+        ? TupleEqual<RX, RY>
+        : false
+      : false
+    : Y extends [] ? true : false;
   
 export type TupleToIntersection<T extends readonly any[]> = T extends [infer F, ...infer R] ? TupleToIntersection<R> & F : unknown;
 
@@ -40,7 +52,7 @@ type TypeNameToType<ET extends Record<string, any>, T extends TypeName<ET>[]> = 
 type PickMatchingFunctions<ET extends Record<string, any>, TN extends TypeName<ET>[], TF extends FT[]> =
 	TF extends [infer F, ...infer R]
   	? F extends FT
-		  ? LooseEqual<Parameters<F>, TypeNameToType<ET, TN>> extends true
+		  ? TupleEqual<Parameters<F>, TypeNameToType<ET, TN>> extends true
 			  ? F
 				: PickMatchingFunctions<ET, TN, R extends FT[] ? R : []>
 			: never

@@ -104,12 +104,12 @@ const r2 = func(1, 2); // boolean
 
 ```typescript
 const fn = createOverloadedFunction<[
-	(a: number) => boolean,
-	(a: number, b: string) => boolean,
+  (a: number) => boolean,
+  (a: number, b: string) => boolean,
 ]>();
 ```
 
-不过换句话说，可选参数的场景，在函数实现中就存在判断参数类型的逻辑。这好像和我们使用这个库编写重载代码的初衷相悖吧😂。当然大家有什么好的想法，欢迎交流指教。
+不过话说回来，可选参数的场景，在函数实现中就存在判断参数类型的逻辑。这好像和我们使用这个库编写重载代码的初衷相悖吧😂。当然大家有什么好的想法，欢迎交流指教。
 
 ### 结构化类型
 
@@ -119,22 +119,22 @@ TS 是结构化类型系统，所以我们在推导类型、定义使用重载�
 
 ```typescript
 class Person {
-	constructor(public name: string, public age: number) {}
+  constructor(public name: string, public age: number) {}
 }
 const extendType = createExtendType({
-	person: Person,
+  person: Person,
 });
 const fn = createOverloadedFunction<[
-	(a: { name: string, age: number }) => number,
-	(a: Person) => boolean
+  (a: { name: string, age: number }) => number,
+  (a: Person) => boolean
 ], typeof extendType>({
-	extendType: extendType
+  extendType: extendType
 });
 fn.addImple('object', (a) => a.age);
 fn.addImple('person', (a) => a.age > 18); // error
 ```
 
-在上面的例子中，两个实现匹配到的都是第一个函数签名。因为 TS 是结构化类型，`Person` 类型和 `{ name: string, age: number }` 是兼容的。源码中我使用了一个 `LooseEqual` 工具类来判断两个类型是否相等
+在上面的例子中，两个实现匹配到的都是第一个函数签名。因为 TS 是结构化类型，`Person` 类型和 `{ name: string, age: number }` 是兼容的。源码中使用了一个 `LooseEqual` 类型工具来匹配函数参数类型
 
 ```typescript
 export type LooseEqual<X, Y> = X extends Y ? true : Y extends X ? true : false;
