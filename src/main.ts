@@ -136,10 +136,24 @@ const test3 = createOverloadedFunction<[
 ]>();
 
 test3.addImple('number','string', (a, b) => true);
-test3.addImple('string', 'number', (a, b) => b.toFixed());
+test3.addImple('string', 'number', (a, b) => b?.toFixed() || a);
 
 const res3 = test3(10, 'hello');
 const res4 = test3('hello');
 console.log(res3, res4); // true hello
 
+class Person {
+	constructor(public name: string, public age: number) {}
+}
+const extendType3 = createExtendType({
+	person: Person,
+});
+const fn = createOverloadedFunction<[
+	(a: { name: string, age: number }) => number,
+	(a: Person) => boolean
+], typeof extendType3>({
+	extendType: extendType3,
+});
+fn.addImple('object', (a) => a.age);
+fn.addImple('person', (a) => a.age > 18);
 

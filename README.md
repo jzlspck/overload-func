@@ -40,9 +40,17 @@ func.addImple('number', 'number', (a, b) => {
 });
 ```
 
-TS 会根据传入的参数类型，自动推导匹配对应的函数类型。如果匹配不到相应的函数类型，或者定义的实现函数参数或返回值类型不匹配，TS 就会报错，拥有完善的类型检查和提示。
+TS 会根据传入的参数类型，自动推导匹配对应的函数类型。
+
+![类型推导](./static/02.png)
+
+如果匹配不到相应的函数类型，或者定义的实现函数参数或返回值类型不匹配，TS 就会报错，拥有完善的类型检查和提示。
+
+![类型检查](./static/03.png)
 
 > 小技巧：调用 `addImple` 方法时，先写好最后一个函数参数占位，再写前面的参数类型，就可以随时获得代码补全提示，
+
+![代码提示](./static/01.png)
 
 更多内置类型详见 [*内置类型*](#内置类型)
 
@@ -86,9 +94,31 @@ const r2 = func(1, 2); // boolean
 
 相较于 array、map 这些数据类型，object 匹配优先级最低。
 
+### 可选参数
+
+
 ### 结构化类型
 
-TS 是结构化类型系统，所以我们在推导类型、定义使用重载、思考可能出现的问题时，一定要从**结构化类型**的角度出发来考虑问题。
+TS 是结构化类型系统，所以我们在推导类型、定义使用重载、处理使用中遇到的问题时，一定要从**结构化类型**的角度出发来考虑问题。
+
+看下面的例子（使用了后面会介绍到的 [*拓展类型*](#拓展类型)）
+
+```typescript
+class Person {
+	constructor(public name: string, public age: number) {}
+}
+const extendType = createExtendType({
+	person: Person,
+});
+const fn = createOverloadedFunction<[
+	(a: { name: string, age: number }) => number,
+	(a: Person) => boolean
+], typeof extendType>({
+	extendType: extendType
+});
+fn.addImple('object', (a) => a.age);
+fn.addImple('person', (a) => a.age > 18);
+```
 
 ## 高阶指引
 
