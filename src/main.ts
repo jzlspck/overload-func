@@ -2,6 +2,22 @@ import { createOverloadedFunction } from './index';
 import { createExtendType } from './utils';
 
 
+const fn = createOverloadedFunction<[
+  () => boolean,
+  (a: number) => boolean,
+  (a: string, b: string) => string,
+  (x: number, y: (n: number) => number) => number,
+  (d: Promise<number>) => Promise<string>,
+  (u: { name: string, age: number }) => unknown
+]>();
+fn.addImple(() => (0 as any));
+fn.addImple('number', (a) => (0 as any));
+fn.addImple('string', 'string', (a, b) => (0 as any));
+fn.addImple('number', 'function', (x, y) => (0 as any));
+fn.addImple('promise', (u) => (0 as any));
+fn.addImple('object', (u) => (0 as any));
+
+
 class User {
 	constructor(public name: string, public age: number, public gender: string) {}
 }
