@@ -12,9 +12,7 @@ export type LooseEqual<X, Y> = Equal<Y, object> extends true
     : X extends Y
     	? true
     	: false
-  	: X extends Y
-  	? true
-  : false;
+  : X extends Y ? true : false;
 // 内置类型
 type BaseType = Omit<TypeMap<{}>, 'object'> extends Record<string, infer V> ? V : never;
 

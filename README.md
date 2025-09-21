@@ -92,7 +92,33 @@ const r2 = func(1, 2); // boolean
 
 目前支持这些类型，包含所有基本类型，以及一些常用的内置类型。能够满足大部分的场景。
 
-相较于 array、map 这些数据类型，object 匹配优先级最低。
+需要注意的是，`object` 类型不能和其他内置类型匹配，例如 `any[]`、`Map` 等，这些类型本该满足 `extends object` 的条件，但是为了更好的作区分，内部判断时**不为 `object` 类型的其他内置类型，是不会被认为匹配 `object` 类型的**。例如这样：
+
+```typescript
+const fun = createOverloadedFunction<[
+  (a: string[]) => string
+]>();
+fun.addImple('object', (a) => a.join('')); // error
+fun.addImple('array', (a) => a.join(''));
+```
+
+![object 类型](./static/11.png)
+
+你不能拿 `object` 参数去匹配 `string[]`，虽然这在 TS 中看起来是正常的，但在这里你需要用 `array` 来匹配数组类型。
+
+源码中使用了一个 `LooseEqual` 类型工具来匹配函数参数类型
+
+```typescript
+export type LooseEqual<X, Y> = Equal<Y, object> extends true
+  ? X extends BaseType
+    ? false
+    : X extends Y
+    	? true
+    	: false
+  : X extends Y ? true : false;
+```
+
+其中 `BaseType` 为`object` 以外的其他**内置类型**。`object` 类型会单独处理，不会和其他内置类型匹配。
 
 ### 可选参数
 
@@ -134,11 +160,7 @@ fn.addImple('object', (a) => a.age);
 fn.addImple('person', (a) => a.age > 18); // error
 ```
 
-在上面的例子中，两个实现匹配到的都是第一个函数签名。因为 TS 是结构化类型，`Person` 类型和 `{ name: string, age: number }` 是兼容的。源码中使用了一个 `LooseEqual` 类型工具来匹配函数参数类型
-
-```typescript
-export type LooseEqual<X, Y> = X extends Y ? true : Y extends X ? true : false;
-```
+在上面的例子中，两个实现匹配到的都是第一个函数签名（运行起来虽然会得到想要的结果，但是 TS 会报错）。因为 TS 是结构化类型，`Person` 类型和 `{ name: string, age: number }` 是兼容的。
 
 如果确实需要上面的功能，就需要两个对象拥有明确区别的属性。我们可以为 `Person` 添加一个 `gender` 属性，为 `{ name: string, age: number }` 添加一个 `id` 属性。这样一来，就能正确匹配到各自的函数签名。
 
@@ -169,6 +191,8 @@ const r1 = func('hello'); // HELLO
 ```
 
 此时，调用函数并传入一个 `string` 类型参数，会**依次调用两个实现函数**。但是要注意，**返回值为最后一个实现函数的返回值**。
+
+![allowMultiple 配置选项](./static/12.png)
 
 ### 拓展类型
 
@@ -205,8 +229,41 @@ const res2 = test2(new Student('Alice'));
 console.log(res1, res2); // John 5
 ```
 
-正如之前 [*结构化类型*](#结构化类型) 中提到的问题，TS 是结构化类型系统。所以上面的例子中，为了区分 `Teacher` 和 `Student`，它们必须拥有不同的属性。
+正如之前 [*结构化类型*](#结构化类型) 中提到的问题，TS 是结构化类型系统。所以上面的例子中，为了区分 `Teacher` 和 `Student`，它们必须拥有能够区分彼此的不同属性。
 
 当通过 `extendType` 拓展类型时，`addImple` 方法的可选类型参数就会增加 `teacher` 和 `student`，同时也会有相应的代码提示。
 
 ![代码提示](./static/04.png)
+
+### 在类中使用
+
+要在类中使用函数，重要的一点就是正确处理 `this` 的指向，并且在 TS 类型中正确推导它。如果你 TS 写的还不错，那这和上面例子的使用并没有大的区别。
+
+```typescript
+const test = createOverloadedFunction<[
+	(this: Test, n: number) => boolean,
+	(this: Test, n: string, s: string) => string,
+]>();
+
+test.addImple('number', function(n) {
+	return n > this.count;
+});
+test.addImple('string', 'string', function(n, m) {
+	return n + m;
+});
+class Test {
+  count = 10
+  test = test
+}
+const t = new Test();
+
+console.log(t.test(8));
+console.log(t.test('pknk', 'lll'));
+```
+
+1. 在定义函数签名时，需要使用 `this` 类型来指定 `this` 的指向。
+2. 在添加实现函数时，不能使用箭头函数，而是使用普通函数。这是 JS 基础知识，这里就不做赘述。
+
+这样就可以实现重载的同时，拥有正确的 `this` 类型推导。
+
+![在类中使用](./static/13.png)
