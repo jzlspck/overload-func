@@ -10,6 +10,8 @@ overload-func 是一个**极少量运行时代码**的函数重载库，提供�
 
 [gitee 地址](https://gitee.com/two-people-2406/overload-func)
 
+[在线 demo，来试一试吧](https://stackblitz.com/edit/vitejs-vite-w1td6bdf?file=src%2Fmain.ts)
+
 ## 安装
 
 ```
