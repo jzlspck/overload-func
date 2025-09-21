@@ -7,8 +7,16 @@ export type Equal<X, Y> =
   (<T>() => T extends Y ? 1 : 2) ? true : false
 // 宽松相等，继承也可以，但是其他复杂类型不能和 object 匹配
 export type LooseEqual<X, Y> = Equal<Y, object> extends true
-  ? 0
-  : X extends Y ? true : false;
+  ? X extends BaseType
+    ? false
+    : X extends Y
+    	? true
+    	: false
+  	: X extends Y
+  	? true
+  : false;
+// 内置类型
+type BaseType = Omit<TypeMap<{}>, 'object'> extends Record<string, infer V> ? V : never;
 
 // 匹配两个元组类型，X 为函数签名参数类型，Y 为字符串映射的参数类型
 export type TupleEqual<X extends any[], Y extends any[]> =
