@@ -6,6 +6,10 @@ overload-func 是一个**极少量运行时代码**的函数重载库，提供�
 
 <font size="6">优雅永不过时！！！</font>
 
+[github 地址](https://github.com/jzlspck/overload-func)
+
+[gitee 地址](https://gitee.com/two-people-2406/overload-func)
+
 ## 安装
 
 ```
