@@ -3,7 +3,7 @@
   "private": false,
   "version": "1.0.0",
   "author": "fan-two",
-  "description": "",
+  "description": "一个轻量级的 TypeScript 函数重载工具库，提供了更优雅的函数重载实现方式。",
   "keywords": [
     "typescript",
     "overload",
@@ -12,16 +12,16 @@
   "type": "module",
   "main": "lib/overload.umd.js",
   "module": "lib/overload.es.js",
-  "types": "lib/types/index.d.ts",
+  "types": "lib/types/entry.d.ts",
   "files": [
     "lib/*"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/jzlspck/flip-js.git"
+    "url": "https://github.com/jzlspck/overload-func.git"
   },
   "bugs": {
-    "url": "https://github.com/jzlspck/flip-js/issues",
+    "url": "https://github.com/jzlspck/overload-func/issues",
     "email": "3098735881@qq.com"
   },
   "license": "MIT",

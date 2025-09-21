@@ -200,8 +200,8 @@ const r1 = func('hello'); // HELLO
 
 通过创建类来定义类型，传入对象，键名将作为 `addImple` 方法的可选类型参数，类作为键值。这里希望推荐 `createExtendType` 方法创建拓展类型（可以得到更好的类型检查）。
 
-1. 函数的返回值传入 `extendType` 参数
-2. 函数返回值的函数
+1. 把函数的返回值传入 `extendType` 参数
+2. 把函数返回值的类型传入 `createOverloadedFunction` 的第二个类型参数
 
 ```typescript
 class Teacher {
@@ -212,20 +212,20 @@ class Student {
   score: number;
   constructor(public name: string) {}
 }
-const extendType2 = createExtendType({
+const extendType = createExtendType({
   teacher: Teacher,
   student: Student,
 });
-const test2 = createOverloadedFunction<[
+const test = createOverloadedFunction<[
   (t: Teacher) => string,
   (s: Student) => number,
-], typeof extendType2>({
-  extendType: extendType2,
+], typeof extendType>({
+  extendType: extendType
 });
-test2.addImple('teacher', (t) => t.name);
-test2.addImple('student', (s) => s.name.length);
-const res1 = test2(new Teacher('John'));
-const res2 = test2(new Student('Alice'));
+test.addImple('teacher', (t) => t.name);
+test.addImple('student', (s) => s.name.length);
+const res1 = test(new Teacher('John'));
+const res2 = test(new Student('Alice'));
 console.log(res1, res2); // John 5
 ```
 
@@ -241,15 +241,15 @@ console.log(res1, res2); // John 5
 
 ```typescript
 const test = createOverloadedFunction<[
-	(this: Test, n: number) => boolean,
-	(this: Test, n: string, s: string) => string,
+  (this: Test, n: number) => boolean,
+  (this: Test, n: string, s: string) => string,
 ]>();
 
 test.addImple('number', function(n) {
-	return n > this.count;
+  return n > this.count;
 });
 test.addImple('string', 'string', function(n, m) {
-	return n + m;
+  return n + m;
 });
 class Test {
   count = 10
